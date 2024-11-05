@@ -4,21 +4,27 @@
     <div class="center-card">
       <v-card class="mx-auto" elevation="1" max-width="800">
         <v-card-title class="py-5 title-container">
-          <v-img src="../assets/login-icon.png" max-width="50" class="mr-3" />
+          <v-img src="../assets/img/login-icon.png" max-width="80" class="mr-3" />
           <!-- 로그인 아이콘 이미지 추가 -->
           <span class="board-title">로그인</span>
           <!-- "로그인" 텍스트 추가 -->
         </v-card-title>
 
         <v-card-text>
-          <div class="text-subtitle-2 font-weight-black mb-1">Log in to your account</div>
+          <div class="text-subtitle-2 font-weight-black mb-4"></div>
 
-          <v-text-field label="Email" variant="outlined" single-line></v-text-field>
+          <!-- ID 레이블 -->
+          <div class="input-label">ID</div>
+          <v-text-field label="ID" variant="outlined" single-line class="mb-4"></v-text-field>
+
+          <!-- PW 레이블 -->
+          <div class="input-label">PW</div>
           <v-text-field
             label="Password"
             type="password"
             variant="outlined"
             single-line
+            class="mb-5"
           ></v-text-field>
 
           <v-btn
@@ -31,7 +37,7 @@
             block
             @click="handleLogin"
           >
-            Log In
+            로그인
           </v-btn>
 
           <v-btn
@@ -42,18 +48,7 @@
             block
             @click="goToRegister"
           >
-            Sign Up
-          </v-btn>
-
-          <v-btn
-            class="text-none"
-            color="grey-lighten-3"
-            size="x-large"
-            variant="flat"
-            block
-            @click="cancel"
-          >
-            Cancel
+            회원가입
           </v-btn>
         </v-card-text>
       </v-card>
@@ -91,11 +86,6 @@ export default defineComponent({
       // 회원가입 페이지로 이동하는 로직
       this.$router.push({ name: "RegisterView" }); // 라우터를 사용해 회원가입 페이지로 이동
     },
-    cancel() {
-      // 취소 로직 추가
-      // 예: 메인 페이지로 돌아가기
-      this.$router.push({ name: "HomeView" }); // 예시로 홈 화면으로 이동
-    },
   },
 });
 </script>
@@ -104,9 +94,9 @@ export default defineComponent({
 .center-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* 세로 가운데에서 약간 위로 조정 */
+  align-items: flex-start;
   height: 100vh;
-  padding-top: 10vh; /* 화면 상단에서 약간 내려오도록 추가 */
+  padding-top: 10vh;
 }
 
 .center-card {
@@ -116,12 +106,13 @@ export default defineComponent({
 
 .title-container {
   display: flex;
-  align-items: center; /* 이미지와 텍스트가 수평으로 정렬되도록 설정 */
+  align-items: center;
+  justify-content: center;
 }
 
 .board-title {
-  font-weight: 900; /* 제목 글씨를 더 굵게 설정 */
-  font-size: 2rem; /* 제목의 글자 크기 조정 */
+  font-weight: 900;
+  font-size: 2rem;
   text-align: center;
 }
 
@@ -130,7 +121,11 @@ export default defineComponent({
 }
 
 .mb-4 {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mb-5 {
+  margin-bottom: 2rem;
 }
 
 .py-5 {
@@ -139,6 +134,18 @@ export default defineComponent({
 }
 
 .mr-3 {
-  margin-right: 1rem; /* 이미지와 텍스트 사이의 간격 추가 */
+  margin-right: 1rem;
+}
+
+/* ID와 PW 레이블 스타일 */
+.input-label {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.font-bold {
+  font-weight: 900; /* 텍스트를 더 굵게 설정 */
 }
 </style>

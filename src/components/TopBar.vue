@@ -1,7 +1,9 @@
 <template>
   <v-app-bar app class="topbar">
-    <v-toolbar-title>
-      <v-img src="../assets/logo.png" max-width="40" />
+    <v-toolbar-title style="min-width: 200px">
+      <!-- 최소 너비 설정 -->
+      <v-img src="../assets/img/logo1.png" width="200" height="80" />
+      <!-- 고정된 너비와 높이 설정 -->
     </v-toolbar-title>
 
     <v-spacer></v-spacer>
@@ -37,10 +39,10 @@
 export default {
   methods: {
     goToMap() {
-      // Map 페이지로 이동하는 로직을 추가합니다.
+      this.$router.push({ name: "map" });
     },
     goToBoard() {
-      // 게시판 페이지로 이동하는 로직을 추가합니다.
+      this.$router.push({ name: "board" });
     },
     goToMyPage() {
       // 마이페이지로 이동하는 로직을 추가합니다.
@@ -55,11 +57,12 @@ export default {
 <style scoped>
 .topbar {
   height: 80px; /* TopBar 높이 설정 (필요에 따라 조정) */
+  overflow: visible; /* 자식 요소가 잘리지 않도록 설정 */
 }
 
 .button-container {
   display: flex;
-  flex-grow: 30; /* 버튼 컨테이너가 가능한 공간을 모두 차지하도록 설정 */
+  flex-grow: 30; /* 버튼 컨테이너의 flex-grow를 1로 조정 */
   justify-content: space-evenly; /* 버튼 간의 간격을 균등하게 배치 */
 }
 
