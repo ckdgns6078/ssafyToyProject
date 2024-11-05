@@ -84,7 +84,7 @@ export default defineComponent({
     },
     goToRegister() {
       // 회원가입 페이지로 이동하는 로직
-      this.$router.push({ name: "RegisterView" }); // 라우터를 사용해 회원가입 페이지로 이동
+      this.$router.push({ name: "join" }); // 라우터를 사용해 회원가입 페이지로 이동
     },
   },
 });

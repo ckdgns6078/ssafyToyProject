@@ -11,9 +11,22 @@ const routes = [
     component: Home,
   },
   {
+    path: "/",
+    name: "myapge",
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/user/MyPage.vue"),
+  },
+  {
+    path: "/join",
+    name: "join",
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/user/Join.vue"),
+  },
+  {
     path: "/board",
     name: "board",
-    component: () => import(/* webpackChunkName: "about" */ "../views/board/Board.vue"),
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/board/Board.vue"),
   },
   {
     path: "/map",
