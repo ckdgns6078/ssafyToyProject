@@ -45,7 +45,7 @@ export default {
       this.$router.push({ name: "board" });
     },
     goToMyPage() {
-      // 마이페이지로 이동하는 로직을 추가합니다.
+      this.$router.push({ name: "myapge" });
     },
     showUserInfo() {
       // 사용자 정보를 보여주는 로직을 추가합니다.

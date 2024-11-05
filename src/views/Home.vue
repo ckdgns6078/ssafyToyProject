@@ -4,7 +4,11 @@
     <div class="center-card">
       <v-card class="mx-auto" elevation="1" max-width="800">
         <v-card-title class="py-5 title-container">
-          <v-img src="../assets/img/login-icon.png" max-width="80" class="mr-3" />
+          <v-img
+            src="../assets/img/login-icon.png"
+            max-width="80"
+            class="mr-3"
+          />
           <!-- 로그인 아이콘 이미지 추가 -->
           <span class="board-title">로그인</span>
           <!-- "로그인" 텍스트 추가 -->
@@ -15,7 +19,12 @@
 
           <!-- ID 레이블 -->
           <div class="input-label">ID</div>
-          <v-text-field label="ID" variant="outlined" single-line class="mb-4"></v-text-field>
+          <v-text-field
+            label="ID"
+            variant="outlined"
+            single-line
+            class="mb-4"
+          ></v-text-field>
 
           <!-- PW 레이블 -->
           <div class="input-label">PW</div>

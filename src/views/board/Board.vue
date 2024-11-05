@@ -54,7 +54,7 @@
             <td>{{ post.id }}</td>
             <td>{{ post.type === "broker" ? "공인중개사" : "일반사용자" }}</td>
             <td>
-              <router-link :to="'/post/' + post.id">{{
+              <router-link :to="'/boardDetail?id=' + post.id">{{
                 post.title
               }}</router-link>
             </td>
