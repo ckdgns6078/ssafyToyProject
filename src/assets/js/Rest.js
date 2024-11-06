@@ -14,6 +14,7 @@ const login = async (userId, userPwd, vm) => {
     if (response.status === 200) {
       vm.$router.push({ name: "board" });
       console.log("response : ", response.data);
+      console.log("resonse 성공");
     }
   } catch (error) {
     console.log("로그인 요청 중 실패 ", error);
