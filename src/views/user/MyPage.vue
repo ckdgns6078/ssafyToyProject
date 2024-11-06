@@ -4,11 +4,7 @@
     <div class="center-card">
       <v-card class="mx-auto" elevation="1" max-width="800">
         <v-card-title class="py-5 title-container">
-          <v-img
-            src="../../assets/img/login-icon.png"
-            max-width="80"
-            class="mr-3"
-          />
+          <v-img src="../../assets/img/login-icon.png" max-width="80" class="mr-3" />
           <span class="board-title">마이 페이지</span>
         </v-card-title>
 
@@ -131,6 +127,8 @@ export default defineComponent({
     TopBar,
   },
   data() {
+    const userinfo = sessionStorage.getItem("userinfo");
+
     return {
       name: "", // 이름
       username: "", // 아이디

@@ -4,11 +4,7 @@
     <div class="center-card">
       <v-card class="mx-auto" elevation="1" max-width="800">
         <v-card-title class="py-5 title-container">
-          <v-img
-            src="../assets/img/login-icon.png"
-            max-width="80"
-            class="mr-3"
-          />
+          <v-img src="../assets/img/login-icon.png" max-width="80" class="mr-3" />
           <!-- 로그인 아이콘 이미지 추가 -->
           <span class="board-title">로그인</span>
           <!-- "로그인" 텍스트 추가 -->
@@ -20,6 +16,7 @@
           <!-- ID 레이블 -->
           <div class="input-label">ID</div>
           <v-text-field
+            v-model="userId"
             label="ID"
             variant="outlined"
             single-line
@@ -29,6 +26,7 @@
           <!-- PW 레이블 -->
           <div class="input-label">PW</div>
           <v-text-field
+            v-model="userPwd"
             label="Password"
             type="password"
             variant="outlined"
@@ -67,9 +65,8 @@
 
 <script>
 import { defineComponent } from "vue";
-
-// Components
 import TopBar from "../components/TopBar.vue";
+import axios from "axios"; // axios를 import
 
 export default defineComponent({
   name: "TopBarView",
@@ -77,23 +74,31 @@ export default defineComponent({
   components: {
     TopBar,
   },
+
   data() {
     return {
       loading: false,
+      userId: "", // ID 입력값
+      userPwd: "", // PW 입력값
     };
   },
+
   methods: {
-    handleLogin() {
-      // 로그인 로직 추가
+    async handleLogin() {
+      if (!this.userId || !this.userPwd) {
+        alert("아이디와 비밀번호를 입력해주세요.");
+        return;
+      }
+
       this.loading = true;
-      setTimeout(() => {
-        this.loading = false;
-        // 로그인 성공 또는 실패 처리
-      }, 2000); // 예시로 2초 대기 후 로딩 해제
+      console.log(this.$rest);
+      await this.$rest.login(this.userId, this.userPwd, this);
+      this.loadiong = false;
     },
+
     goToRegister() {
-      // 회원가입 페이지로 이동하는 로직
-      this.$router.push({ name: "join" }); // 라우터를 사용해 회원가입 페이지로 이동
+      // 회원가입 페이지로 이동
+      this.$router.push({ name: "join" });
     },
   },
 });
@@ -146,7 +151,6 @@ export default defineComponent({
   margin-right: 1rem;
 }
 
-/* ID와 PW 레이블 스타일 */
 .input-label {
   font-size: 1rem;
   font-weight: bold;
@@ -155,6 +159,6 @@ export default defineComponent({
 }
 
 .font-bold {
-  font-weight: 900; /* 텍스트를 더 굵게 설정 */
+  font-weight: 900;
 }
 </style>

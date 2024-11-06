@@ -43,26 +43,29 @@
         <thead>
           <tr>
             <th class="num-column">번호</th>
-            <th class="type-column">분류</th>
             <th class="title-column">제목</th>
             <th class="author-column">작성자</th>
+            <th class="type-column">분류</th>
             <th class="date-column">작성일</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="post in filteredPosts" :key="post.id">
             <td>{{ post.id }}</td>
-            <td>{{ post.type === "broker" ? "공인중개사" : "일반사용자" }}</td>
             <td>
-              <router-link :to="'/boardDetail?id=' + post.id">{{
-                post.title
-              }}</router-link>
+              <router-link :to="'/boardDetail?id=' + post.id">{{ post.title }}</router-link>
             </td>
             <td>{{ post.author }}</td>
+            <td>{{ post.type === "broker" ? "공인중개사" : "일반사용자" }}</td>
             <td>{{ post.date }}</td>
           </tr>
         </tbody>
       </table>
+
+      <!-- 게시글 작성 버튼 -->
+      <div class="write-button-container">
+        <button @click="writePost" class="write-button">게시글 작성</button>
+      </div>
     </main>
   </div>
 </template>
@@ -167,13 +170,16 @@ export default defineComponent({
         } else if (this.searchOption === "title") {
           return post.title.includes(this.searchTerm);
         } else if (this.searchOption === "author_title") {
-          return (
-            post.author.includes(this.searchTerm) ||
-            post.title.includes(this.searchTerm)
-          );
+          return post.author.includes(this.searchTerm) || post.title.includes(this.searchTerm);
         }
         return true;
       });
+    },
+  },
+  methods: {
+    writePost() {
+      // 게시글 작성 페이지로 이동
+      this.$router.push("/boardcreate");
     },
   },
 });
@@ -228,27 +234,65 @@ export default defineComponent({
 }
 
 .search-button {
-  border: 1px solid #ddd; /* 테두리 추가 */
-  background-color: white; /* 배경색 설정 */
+  border: 1px solid #ddd;
   border-radius: 4px; /* 모서리 둥글게 */
-  padding: 8px;
-  margin-left: 5px; /* 버튼과 입력창 간 간격 */
-  cursor: pointer; /* 마우스 커서 포인터로 변경 */
+  background-color: #fff;
+  padding: 8px; /* 버튼 패딩 조정 */
+  cursor: pointer;
+}
+
+.search-button img {
+  vertical-align: middle;
 }
 
 .board-table {
   width: 100%;
-  border-collapse: collapse; /* 테두리 겹침 방지 */
+  border-collapse: collapse;
 }
 
 .board-table th,
 .board-table td {
   padding: 12px;
-  border: 1px solid #ddd; /* 테두리 추가 */
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
-.board-table th {
-  background-color: #f9f9f9; /* 헤더 배경색 */
-  text-align: left; /* 텍스트 왼쪽 정렬 */
+.num-column {
+  width: 5%;
+}
+
+.type-column {
+  width: 10%;
+}
+
+.title-column {
+  width: 45%;
+}
+
+.author-column {
+  width: 15%;
+}
+
+.date-column {
+  width: 15%;
+}
+
+.write-button-container {
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  margin-top: 20px;
+}
+
+.write-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.write-button:hover {
+  background-color: #0056b3;
 }
 </style>

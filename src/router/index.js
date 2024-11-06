@@ -11,28 +11,29 @@ const routes = [
     component: Home,
   },
   {
+    path: "/boardcreate",
+    name: "boardcreate",
+    component: () => import(/* webpackChunkName: "about" */ "../views/board/BoardCreate.vue"),
+  },
+  {
     path: "/boardDetail",
     name: "boardDetail",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/board/BoardDetail.vue"),
+    component: () => import(/* webpackChunkName: "about" */ "../views/board/BoardDetail.vue"),
   },
   {
     path: "/mypage",
     name: "myapge",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/user/MyPage.vue"),
+    component: () => import(/* webpackChunkName: "about" */ "../views/user/MyPage.vue"),
   },
   {
     path: "/join",
     name: "join",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/user/Join.vue"),
+    component: () => import(/* webpackChunkName: "about" */ "../views/user/Join.vue"),
   },
   {
     path: "/board",
     name: "board",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/board/Board.vue"),
+    component: () => import(/* webpackChunkName: "about" */ "../views/board/Board.vue"),
   },
   {
     path: "/map",
