@@ -53,7 +53,7 @@
           <tr v-for="post in filteredPosts" :key="post.id">
             <td>{{ post.id }}</td>
             <td>
-              <router-link :to="'/boardDetail?id=' + post.id">{{ post.title }}</router-link>
+              <router-link :to="'/boardDetail?articleno=' + post.id">{{ post.title }}</router-link>
             </td>
             <td>{{ post.author }}</td>
             <td>{{ post.type === "broker" ? "공인중개사" : "일반사용자" }}</td>
@@ -73,6 +73,7 @@
 <script>
 import { defineComponent, computed } from "vue";
 import TopBar from "../../components/TopBar.vue";
+import axios from "axios";
 
 export default defineComponent({
   components: {
@@ -83,78 +84,7 @@ export default defineComponent({
       searchTerm: "", // 검색어
       searchOption: "author", // 기본 선택 옵션
       postType: "all", // 기본 선택 라디오 버튼
-      posts: [
-        {
-          id: 1,
-          title: "첫 번째 게시글",
-          author: "홍길동",
-          date: "2024-11-01",
-          type: "broker", // 공인중개사
-        },
-        {
-          id: 2,
-          title: "두 번째 게시글",
-          author: "이순신",
-          date: "2024-11-02",
-          type: "general", // 일반사용자
-        },
-        {
-          id: 3,
-          title: "세 번째 게시글",
-          author: "강감찬",
-          date: "2024-11-03",
-          type: "broker", // 공인중개사
-        },
-        {
-          id: 4,
-          title: "네 번째 게시글",
-          author: "김유신",
-          date: "2024-11-04",
-          type: "general", // 일반사용자
-        },
-        {
-          id: 5,
-          title: "다섯 번째 게시글",
-          author: "이몽룡",
-          date: "2024-11-05",
-          type: "broker", // 공인중개사
-        },
-        {
-          id: 6,
-          title: "여섯 번째 게시글",
-          author: "성춘향",
-          date: "2024-11-06",
-          type: "general", // 일반사용자
-        },
-        {
-          id: 7,
-          title: "일곱 번째 게시글",
-          author: "장보고",
-          date: "2024-11-07",
-          type: "broker", // 공인중개사
-        },
-        {
-          id: 8,
-          title: "여덟 번째 게시글",
-          author: "황진이",
-          date: "2024-11-08",
-          type: "general", // 일반사용자
-        },
-        {
-          id: 9,
-          title: "아홉 번째 게시글",
-          author: "김소월",
-          date: "2024-11-09",
-          type: "broker", // 공인중개사
-        },
-        {
-          id: 10,
-          title: "열 번째 게시글",
-          author: "이육사",
-          date: "2024-11-10",
-          type: "general", // 일반사용자
-        },
-      ],
+      posts: [],
     };
   },
   computed: {
@@ -177,10 +107,27 @@ export default defineComponent({
     },
   },
   methods: {
+    async handleBoardList() {
+      //페이지 ?page 값 받기 없으면 1로 선언
+      const pageNum = this.$route.query.page || 1;
+      const response = await this.$rest.boardAll(pageNum);
+      console.log("hadle response  :" + response);
+
+      if (response && Array.isArray(response.posts)) {
+        this.posts = response.posts;
+        console.log("post : ", this.posts);
+      } else {
+        this.posts = [];
+      }
+    },
+
     writePost() {
       // 게시글 작성 페이지로 이동
       this.$router.push("/boardcreate");
     },
+  },
+  mounted() {
+    this.handleBoardList();
   },
 });
 </script>

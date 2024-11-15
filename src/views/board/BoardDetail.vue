@@ -24,19 +24,13 @@
         <v-card-text class="comment-section">
           <h3>댓글 작성</h3>
           <div class="comment-input">
-            <v-text-field
-              v-model="newComment"
-              placeholder="댓글을 입력하세요"
-            ></v-text-field>
+            <v-text-field v-model="newComment" placeholder="댓글을 입력하세요"></v-text-field>
             <v-btn color="primary" @click="addComment">등록</v-btn>
           </div>
           <h3>댓글</h3>
           <v-list>
             <v-list-item-group>
-              <v-list-item
-                v-for="(comment, index) in comments"
-                :key="comment.id"
-              >
+              <v-list-item v-for="(comment, index) in comments" :key="comment.id">
                 <v-list-item-content>
                   <v-list-item-title>
                     <span>{{ comment.author }}</span>
@@ -45,9 +39,7 @@
                   <v-list-item-subtitle>
                     <div class="comment-content">{{ comment.content }}</div>
                     <div class="comment-actions">
-                      <v-btn text @click="toggleReply(comment.id)"
-                        >대댓글</v-btn
-                      >
+                      <v-btn text @click="toggleReply(comment.id)">대댓글</v-btn>
                       <v-btn
                         v-if="comment.replies.length > 0"
                         text
@@ -63,16 +55,10 @@
                     v-model="comment.replyContent"
                     placeholder="대댓글을 입력하세요"
                   ></v-text-field>
-                  <v-btn color="success" @click="addReply(comment.id)"
-                    >등록</v-btn
-                  >
+                  <v-btn color="success" @click="addReply(comment.id)">등록</v-btn>
                 </div>
                 <div v-if="comment.repliesVisible" class="replies">
-                  <div
-                    class="reply"
-                    v-for="reply in comment.replies"
-                    :key="reply.id"
-                  >
+                  <div class="reply" v-for="reply in comment.replies" :key="reply.id">
                     <div class="reply-content">
                       <span>{{ reply.author }}</span>
                       <span class="reply-date">{{ reply.createdAt }}</span>
@@ -188,6 +174,14 @@ export default defineComponent({
       comment.replyContent = "";
       comment.replying = false;
     },
+
+    async getBordDetail() {
+      const articleno = this.$route.query.articleno;
+      const response = await this.$rest.boardDetail(articleno);
+    },
+  },
+  mounted() {
+    this.getBordDetail();
   },
 });
 </script>

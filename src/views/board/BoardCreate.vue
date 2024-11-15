@@ -76,11 +76,23 @@ export default defineComponent({
     goBack() {
       this.$router.go(-1);
     },
-    submitPost() {
+    async submitPost() {
       if (this.post.title.trim() === "" || this.post.content.trim() === "") {
         alert("제목과 내용을 모두 입력해주세요.");
         return;
       }
+
+      const response = await this.$rest.boardCreate(this.post, this);
+
+      if (response == "fail") {
+        alert("게시글 저장 중 오류가 발생하였습니다.");
+      } else {
+      }
+
+      /**
+       * 데이터가 저장이 되었을때 alert 창을 띄우고 새로고침을 한다
+       * retrun 받은 값으로 이동을 시킨다.
+       */
 
       console.log("작성된 게시글:", this.post);
     },
