@@ -121,8 +121,7 @@
               color="indigo-darken-3"
               size="large"
               variant="flat"
-              @click="handleRegister"
-            >
+              @click="handleRegister()">
               회원가입
             </v-btn>
 
@@ -145,6 +144,7 @@
 <script>
 import { defineComponent } from "vue";
 import TopBar from "../../components/TopBar.vue";
+import axios from "axios";
 
 export default defineComponent({
   name: "RegisterView",
@@ -168,6 +168,47 @@ export default defineComponent({
   methods: {
     handleRegister() {
       // 회원가입 로직 추가
+      console.log(this.name);
+      console.log(this.username);
+      console.log(this.password);
+      console.log(this.confirmPassword);
+      console.log(this.userType);
+      console.log(this.realEstateName);
+      console.log(this.realEstateAddress);
+      console.log(this.phoneNumber);
+      console.log(this.email);
+      console.log(this.emailDomain);
+      if(this.password != this.confirmPassword) {
+        alert("입력한 두 개의 비밀번호가 일치하지 않습니다.");
+        return;
+      }
+      const registerationData = {
+        userId: this.username,
+        userName: this.name,
+        userPwd: this.password,
+        type: this.userType === "agent" ? 2 : 1,
+        emailId: this.email,
+        emailDomain: this.emailDomain,
+        // 공인중개사일 경우에만 해당 정보 추가
+        homeName: this.realEstateName,
+        homeAddress: this.realEstateAddress,
+        phone: this.phoneNumber
+      };
+
+      // AJAX
+      axios
+        .post("http://localhost:8080/user/join", registerationData)
+        .then((response) => {
+          alert("회원가입이 완료되었습니다.");
+          this.resetForm();
+          this.$router.push({ name: "home" });
+        })
+        .catch((error) => {
+          console.error("회원가입 오류: ", error);
+          alert("회원가입 중 문제가 발생했습니다.")
+        })
+
+
     },
     resetForm() {
       // 모든 입력 필드를 빈 문자열로 초기화
