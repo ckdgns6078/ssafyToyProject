@@ -248,8 +248,11 @@ const deleteUserInfo = async (vm) => {
  */
 
 export default {
-  login,
+  boardAll,
   getUserInfo,
+  login,
+  getUserId,
+  boardCreate,
+  boardDetail,
   updateUserInfo,
-  deleteUserInfo,
 };
