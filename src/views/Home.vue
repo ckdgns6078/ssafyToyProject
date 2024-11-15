@@ -91,6 +91,7 @@ export default defineComponent({
       }
 
       this.loading = true;
+      
       console.log(this.$rest);
       await this.$rest.login(this.userId, this.userPwd, this);
       this.loadiong = false;

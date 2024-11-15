@@ -14,21 +14,22 @@
           <!-- 이름 입력 -->
           <div class="input-label">이름</div>
           <v-text-field
-            v-model="name"
+            v-model="userName"
             label="이름"
             variant="outlined"
             single-line
             class="mb-4 full-width"
           ></v-text-field>
 
-          <!-- 아이디 입력 -->
+          <!-- 아이디 입력 (readonly) -->
           <div class="input-label">아이디</div>
           <v-text-field
-            v-model="username"
+            v-model="userId"
             label="아이디"
             variant="outlined"
             single-line
             class="mb-4 full-width"
+            readonly
           ></v-text-field>
 
           <!-- 비밀번호 입력 -->
@@ -42,20 +43,22 @@
             class="mb-4 full-width"
           ></v-text-field>
 
-          <!-- 사용자 유형 선택 -->
+          <!-- 사용자 유형 -->
           <div class="input-label">사용자 유형</div>
-          <div class="radio-group mb-4">
-            <v-radio-group v-model="userType" row>
-              <v-radio label="공인중개사" value="agent"></v-radio>
-              <v-radio label="일반 사용자" value="user"></v-radio>
-            </v-radio-group>
-          </div>
+          <v-text-field
+            v-model="userTypeText"
+            label="사용자 유형"
+            variant="outlined"
+            single-line
+            class="mb-4 full-width"
+            readonly
+          ></v-text-field>
 
           <!-- 공인중개사 정보 입력 -->
-          <div v-if="userType === 'agent'" class="mb-4">
+          <div v-if="userType === 2" class="mb-4">
             <div class="input-label">부동산 이름</div>
             <v-text-field
-              v-model="realEstateName"
+              v-model="homeName"
               label="부동산 이름"
               variant="outlined"
               single-line
@@ -64,7 +67,7 @@
 
             <div class="input-label">부동산 주소</div>
             <v-text-field
-              v-model="realEstateAddress"
+              v-model="homeAddress"
               label="부동산 주소"
               variant="outlined"
               single-line
@@ -73,7 +76,7 @@
 
             <div class="input-label">전화번호</div>
             <v-text-field
-              v-model="phoneNumber"
+              v-model="phone"
               label="전화번호"
               variant="outlined"
               single-line
@@ -81,11 +84,11 @@
             ></v-text-field>
           </div>
 
-          <!-- 이메일 도메인 선택 -->
+          <!-- 이메일 입력 -->
           <div class="input-label">이메일</div>
           <div class="email-domain-container">
             <v-text-field
-              v-model="email"
+              v-model="emailId"
               label="이메일"
               variant="outlined"
               single-line
@@ -106,10 +109,21 @@
               color="indigo-darken-3"
               size="large"
               variant="flat"
-              @click="handleRegister"
+              @click="handleUpdate"
             >
-              정보 수정
+              회원 수정
             </v-btn>
+
+            <v-btn
+              class="text-none full-width"
+              color="indigo-darken-3"
+              size="large"
+              variant="flat"
+              @click="handleDelete"
+            >
+              회원 탈퇴
+            </v-btn>
+
           </div>
         </v-card-text>
       </v-card>
@@ -120,31 +134,81 @@
 <script>
 import { defineComponent } from "vue";
 import TopBar from "../../components/TopBar.vue";
+import Rest from "../../assets/js/Rest";
 
 export default defineComponent({
-  name: "RegisterView",
+  name: "MyPage",
   components: {
     TopBar,
   },
   data() {
-    const userinfo = sessionStorage.getItem("userinfo");
-
     return {
-      name: "", // 이름
-      username: "", // 아이디
+      userId: "", // 사용자 아이디
+      userName: "", // 이름
       password: "", // 비밀번호
-      userType: "", // 사용자 유형
-      realEstateName: "", // 부동산 이름
-      realEstateAddress: "", // 부동산 주소
-      phoneNumber: "", // 전화번호
-      email: "", // 이메일
+      userType: "", // 사용자 유형 (1: 일반인, 2: 공인중개사)
+      userTypeText: "", // 사용자 유형 텍스트
+      homeName: "", // 부동산 이름
+      homeAddress: "", // 부동산 주소
+      phone: "", // 전화번호
+      emailId: "", // 이메일 아이디
       emailDomain: "", // 이메일 도메인
     };
   },
+  async created() {
+    await this.loadUserInfo();
+  },
   methods: {
-    handleRegister() {
-      // 회원 정보 수정 로직 추가
+    async loadUserInfo() {
+      try {
+        const userInfo = await Rest.getUserInfo();
+        if (userInfo) {
+          this.userId = userInfo.userId;
+          this.userName = userInfo.userName;
+          this.userType = userInfo.type;
+          this.userTypeText = userInfo.type === 1 ? "일반인" : "공인중개사";
+          this.emailId = userInfo.emailId;
+          this.emailDomain = userInfo.emailDomain;
+          if (userInfo.type === 2) {
+            this.homeName = userInfo.homeName;
+            this.homeAddress = userInfo.homeAddress;
+            this.phone = userInfo.phone;
+          }
+        }
+      } catch (error) {
+        console.error("사용자 정보 로드 중 오류:", error);
+      }
     },
+    async handleUpdate() {
+      try {
+        const updateData = {
+          userId: this.userId,
+          userName: this.userName,
+          userPwd: this.password,
+          type: this.userType,
+          emailId: this.emailId,
+          emailDomain: this.emailDomain,
+          homeName: this.userType === 2 ? this.homeName : null,
+          homeAddress: this.userType === 2 ? this.homeAddress : null,
+          phone: this.userType === 2 ? this.phone : null,
+        };
+        await this.$rest.updateUserInfo(updateData, this);
+        alert("회원 정보가 성공적으로 수정되었습니다.");
+      } catch (error) {
+        console.error("회원 정보 수정 중 오류:", error);
+        alert("회원 정보 수정에 실패했습니다. 다시 시도해 주세요.");
+      }
+    },
+
+    async handleDelete() {
+      try {
+        await this.$rest.deleteUserInfo(this);
+        alert("회원 탈퇴가 완료되었습니다.")
+      } catch (error) {
+        console.error("회원 탈퇴 중 오류:", error);
+        alert("회원 탈퇴에 실패했습니다. 다시 시도해 주세요.");
+      }
+    }
   },
 });
 </script>
@@ -194,34 +258,25 @@ export default defineComponent({
 }
 
 .button-group .v-btn {
-  flex: 1; /* 버튼을 동일한 비율로 나누기 */
-  margin-right: 0.5rem; /* 오른쪽 버튼과의 간격 */
+  flex: 1;
+  margin-right: 0.5rem;
 }
 
 .button-group .v-btn:last-child {
-  margin-right: 0; /* 마지막 버튼은 간격 제거 */
+  margin-right: 0;
 }
 
 .email-domain-container {
-  display: flex; /* Flexbox 사용 */
-  align-items: center; /* 세로 정렬 */
+  display: flex;
+  align-items: center;
 }
 
 .email-input {
-  flex: 1; /* 이메일 입력 필드가 남은 공간을 모두 차지 */
-  margin-right: 1rem; /* 이메일 입력과 도메인 선택 사이 간격 */
+  flex: 1;
+  margin-right: 1rem;
 }
 
 .domain-select {
-  width: auto; /* 도메인 선택의 기본 너비 사용 */
-}
-
-.radio-group {
-  display: flex; /* 가로 정렬을 위해 flex 사용 */
-  gap: 1rem; /* 라디오 버튼 사이의 간격 조정 */
-}
-
-.mr-3 {
-  margin-right: 1rem;
+  width: auto;
 }
 </style>
