@@ -17,3 +17,8 @@ const app = createApp(App);
 app.config.globalProperties.$rest = rest;
 
 app.use(router).use(vuetify).mount("#app");
+
+
+import { useKakao } from 'vue3-kakao-maps/@utils';
+
+useKakao('ee6473af63dd261f60d12ba84685f2d6');

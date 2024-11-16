@@ -479,6 +479,51 @@ const validateAndRefreshToken = async (vm) => {
   return true;
 };
 
+
+// Kakao Map
+
+/**
+ * 구군 목록
+ */
+const getGugun = async (sido) => {
+  console.log("sido: ", sido);
+  const response = await axios.get(`${BASE_URL}/home/findGugun`, {params: { sido }}); 
+  console.log("response", response.data);
+  return response.data;
+}
+
+/**
+ * 시도 검색
+ */
+const selectSido = async (sido) => {
+  console.log("sido: ", sido);
+  const response = await axios.get(`${BASE_URL}/home/searchSido`, {params: { sido }}); 
+  console.log("response", response);
+  return response.data;
+}
+
+/**
+ * 시도 + 구군 검색
+ */
+const selectSidoGugun = async (sido, gugun) => {
+  console.log("sido: ", sido);
+  console.log("gugun: ", gugun);
+  const response = await axios.get(`${BASE_URL}/home/searchSido`, {params: { sido, gugun }}); 
+  console.log("response", response);
+  return response.data;
+}
+
+/**
+ * 이름으로 검색
+ */
+const selectName = async (name) => {
+  console.log("name: ", name);
+  const response = await axios.get(`${BASE_URL}/home/searchSido`, {params: { name }}); 
+  console.log("response", response);
+  return response.data;
+}
+
+
 export default {
   boardAll,
   getUserInfo,
@@ -495,5 +540,9 @@ export default {
   modifyBoard,
   searchTitle,
   searchAuthor,
-  searchAll
+  searchAll,
+  getGugun,
+  selectSido,
+  selectSidoGugun,
+  selectName
 };

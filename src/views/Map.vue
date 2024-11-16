@@ -5,22 +5,42 @@
       <div class="search-container">
         <!-- 시도/구군 셀렉트 박스 -->
         <div class="location-select">
-          <select class="select-box">
-            <option value="seoul">서울</option>
-            <option value="busan">부산</option>
-            <option value="daegu">대구</option>
+          <select class="select-box" v-model="sido" @change="sidoChange">
+            <option value="서울특별시">서울특별시</option>
+                            <option value="부산광역시">부산광역시</option>
+                            <option value="대구광역시">대구광역시</option>
+                            <option value="인천광역시">인천광역시</option>
+                            <option value="광주광역시">광주광역시</option>
+                            <option value="대전광역시">대전광역시</option>
+                            <option value="울산광역시">울산광역시</option>
+                            <option value="세종특별자치시">세종특별자치시</option>
+                            <option value="경기도">경기도</option>
+                            <option value="강원도">강원도</option>
+                            <option value="충청북도">충청북도</option>
+                            <option value="충청남도">충청남도</option>
+                            <option value="전라북도">전라북도</option>
+                            <option value="전라남도">전라남도</option>
+                            <option value="경상남도">경상남도</option>
+                            <option value="제주특별자치도">제주특별자치도</option>
           </select>
           <select class="select-box">
+            <!-- guList에서 gugun 속성만 뿌리기 -->
+            <option v-for="(gu, index) in guList" :key="index" :value="gu.gugun">
+              {{ gu.gugun }}
+            </option>
+          </select>
+
+          <!-- <select class="select-box">
             <option value="gu1">구1</option>
             <option value="gu2">구2</option>
             <option value="gu3">구3</option>
-          </select>
+          </select> -->
         </div>
 
         <!-- 검색창과 버튼 -->
         <div class="search-bar">
-          <input type="text" placeholder="장소를 검색하세요" class="search-input" />
-          <button class="search-btn">
+          <input type="text" v-model="searchText" placeholder="장소를 검색하세요" class="search-input" />
+          <button class="search-btn" @click="search">
             <i class="fas fa-search"></i>
             <!-- 돋보기 아이콘 -->
           </button>
@@ -29,7 +49,7 @@
 
       <!-- 더미 데이터 리스트 (스크롤 가능) -->
       <div class="search-results">
-        <li v-for="(item, index) in dummyData" :key="index">
+        <li v-for="(item, index) in aptInfo" :key="index" @click="moveMap(item)">
           <div class="apartment">
             <span class="apartment-name">{{ item.name }}</span>
             <div class="address">
@@ -46,14 +66,23 @@
     <div class="main-content">
       <TopBar />
       <!-- 지도가 들어갈 위치 -->
-      <div id="map" class="map-placeholder"></div>
+      <div id="map" ref="mapContainer" class="map-placeholder"></div>
+      <!-- <div ref="mapContainer" style="width:100%; height: 70vh;"></div> -->
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import TopBar from "../components/TopBar.vue";
+
+const serviceKey = process.env.VUE_APP_KAKAO_MAP_API_KEY;
+const mapContainer = ref(null);
+
+
+
+
+
 
 export default defineComponent({
   name: "TopBarView",
@@ -64,46 +93,102 @@ export default defineComponent({
 
   data() {
     return {
-      dummyData: [
-        {
-          name: "아파트1",
-          oldAddress: "경기도 화성시 기산동",
-          newAddress: "경기도 화성시 기산동(신주소)",
-          transactionDate: "2024-01-01",
-        },
-        {
-          name: "아파트2",
-          oldAddress: "서울시 강남구 역삼동",
-          newAddress: "서울시 강남구 역삼동(신주소)",
-          transactionDate: "2023-12-15",
-        },
-        {
-          name: "아파트3",
-          oldAddress: "부산시 부산진구 부전동",
-          newAddress: "부산시 부산진구 부전동(신주소)",
-          transactionDate: "2024-03-10",
-        },
-        {
-          name: "아파트4",
-          oldAddress: "대구시 중구 동성로",
-          newAddress: "대구시 중구 동성로(신주소)",
-          transactionDate: "2024-02-22",
-        },
-        {
-          name: "아파트5",
-          oldAddress: "인천시 연수구 송도동",
-          newAddress: "인천시 연수구 송도동(신주소)",
-          transactionDate: "2024-04-05",
-        },
-      ],
+      sido:'',
+      searchText:"",
+      aptInfo: [],
+      guList:[],
     };
   },
 
   mounted() {
-    // 카카오 맵 API 로드 후 지도를 초기화하는 코드
+    this.loadKakaoMap(); // 로드 시 지도 초기화
   },
 
-  methods: {},
+  methods: {
+    
+    //시도 변경 event
+    async sidoChange(){
+      console.log("this.sido : " , this.sido);
+      const response = await this.$rest.getGugun(this.sido);
+
+      //response 값으로 guList 할당하기 코드추가필요
+      this.guList = response;
+      
+    },
+
+    //시도를 기반으로 구군을 가져오는 코드
+    searchSido(){
+      const response = this.$rest.searchSido(this.sido);
+    },
+
+    //검색어 입력해서 검색하는 코드
+    search(){
+      let response;
+      if(this.searchText.trim()===""){
+        console.log("null");
+        response= this.$rest.searchAll(this.sido);
+        this.aptInfo = response;
+      }else{
+        response = this.$rest.searchName(this.search);
+        this.aptInfo = response;
+      }
+      addMarcker();
+    },
+    
+
+
+    //마커 추가하는 코드
+    addMarcker(){
+      const map = this.map;
+
+      this.aptInfo.forEach(item=>{
+        const position = new window.kakao.maps.LatLng(item.latitude, item.longitude);
+        const marker = new window.kakao.maps.Marker({
+          position : position,
+          title : item.aptName
+        });
+        marker.setMap(map);
+      })
+    },
+
+    //사이드바 클릭 시 화면을 이동시켜주는 함수
+    moveMap(item){
+      const position = new window.kakao.maps.LatLng(item.latitude, item.longitude);
+      this.map.setCenter(position);
+    },
+
+    // 카카오 맵 API 로드
+    loadKakaoMap() {
+      console.log("map 실행완료!!!!!!!!!");
+      const container = this.$refs.mapContainer;
+      const script = document.createElement('script');
+      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${serviceKey}&autoload=false`;
+      document.head.appendChild(script);
+      
+      
+      script.onload = () => {
+        window.kakao.maps.load(() => {
+          const options = {
+            center: new window.kakao.maps.LatLng(37.5665, 126.9780), // 서울 중심 좌표
+            level: 3,
+            maxLevel: 5,
+          };
+
+          const map = new window.kakao.maps.Map(container, options); // this.$refs.mapContainer로 직접 참조
+
+          const markerPosition = new window.kakao.maps.LatLng(37.5665, 126.9780);
+          const marker = new window.kakao.maps.Marker({
+            position: markerPosition, // 마커 위치
+          });
+          
+          // 지도에 마커 추가
+          marker.setMap(map);
+
+
+        });
+      };
+    },
+  },
 });
 </script>
 
@@ -227,8 +312,8 @@ body {
 
 .map-placeholder {
   width: 100%;
-  height: 100%; /* 지도 영역의 높이 설정 */
-  background-color: #d1d1d1;
+  height: 100%; /* 명시적인 높이 지정 */
+  /* background-color: #d1d1d1; */
   display: flex;
   align-items: center;
   justify-content: center;
