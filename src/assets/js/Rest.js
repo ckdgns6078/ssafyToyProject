@@ -78,7 +78,8 @@ const boardAll = async (pageNum) => {
         title: post.subject, // subject -> title
         authorId: post.userId, // userId -> authorId
         author: post.userName, // userName -> author
-        type: post.type ?? "general", // type 필드가 없다면 기본값 설정
+        // type: post.type ?? "general", // type 필드가 없다면 기본값 설정
+        type: post.type === 1 ? "general" : post.type === 2 ? "broker" : "general",
         date: post.registerTime.split(" ")[0], // 날짜를 'YYYY-MM-DD' 형식으로 분리
       }));
       return { posts: formattedData };
@@ -110,9 +111,8 @@ const boardCreate = async (post, vm) => {
   try {
     //userId 값 받기
     // const userId = getUserId();
-    const userId = "test";
-    console.log("post : ", post.title);
-    console.log("post : ", post.content);
+    const userInfo = await getUserInfo();
+    const userId = userInfo.userId;
     const response = await axios.post(BASE_URL + "/article/write", {
       userId: userId,
       subject: post.title,
@@ -141,34 +141,140 @@ const boardDetail = async (articleno) => {
     });
 
     const data = response.data.article;
-
-    // title: "게시글 제목",
-    //     author: "작성자 이름",
-    //     createdAt: "2024-11-05",
-    //     views: 123,
-    //     content: "<p>여기에 게시글 내용을 작성합니다.</p>",
-    // const board [
-    //   title : data.,
-    //   author,
-    //   createAt,
-    //   views,
-    //   content,
-
-    // ]
+    console.log("data : " , data);
 
     if (response.status === 200) {
-      console.log("성공");
-      return;
+      // 데이터 정제
+      const formattedData = {
+        id : data.articleNo,
+        title: data.boardSubject,  // 게시글 번호 => 제목
+        author: data.boardUserId, // 작성자 ID => 작성자
+        content: data.content, // 게시글 내용
+        createdAt: data.boardRegisterTime, // 게시글 등록 시간
+        views: data.hit, // 조회수
+        comments: data.comments.map(comment => {
+          return {
+            id: comment.commentId, // 댓글 ID
+            commentUserId: comment.commentUserId, // 댓글 작성자 ID
+            commentContent: comment.commentContent, // 댓글 내용
+            commentRegisterTime: comment.commentRegisterTime, // 댓글 등록 시간
+            replying: false, // 대댓글 입력 여부
+            replyContent: "", // 대댓글 내용
+            repliesVisible: false, // 대댓글 보기 여부
+            replies: comment.childComments ? comment.childComments.map(child => ({
+              id: child.commentId, // 자식 댓글 ID
+              author: child.commentUserId, // 자식 댓글 작성자 ID
+              content: child.commentContent, // 자식 댓글 내용
+              createdAt: child.commentRegisterTime // 자식 댓글 등록 시간
+            })) : [] // 자식 댓글이 있을 경우 정제하여 포함
+          };
+        }) 
+      };
+      return formattedData;
     }
+    
   } catch (error) {
     console.log("boardDetail error : ", error);
   }
 };
 
+//댓글 추가
+const addComment =  async(articleno , content , vm) =>{
+  try{
+    const userInfo = await getUserInfo();
+    const userId = userInfo.userId;
+    console.log("article : " ,articleno );
+    console.log("content : " , content);
+    const response = await axios.post(BASE_URL + "/article/addComment", {
+      userId : userId,
+      articleNo : articleno,
+      content : content,
+    });
+
+    if(response.status === 200){
+      console.log("새로고침 됩니다");
+    }
+
+  }catch(error){
+    console.log("boardDetail Error" . error);
+  }
+}
+
+//대댓글 추가
+const addChildComment = async(articleNo , parentId , content) =>{
+    console.log("childComment 실행됐음");
+  try{
+    const userInfo = await getUserInfo();
+    const userId = userInfo.userId;
+
+    const response = await axios.post(BASE_URL + "/article/addComment",{
+      userId : userId,
+      articleNo : articleNo,
+      parentId : parentId,
+      content : content,
+    });
+    
+    if(response.status===200){
+      console.log("추가 댓글 성공");
+    }
+
+  }catch(error){
+    console.log("addChildComment ERROR" , error);
+  }
+}
+
+//수정 페이지 이동 관련 검사
+const modifyCheck = async(id) =>{
+  const userInfo = await getUserInfo();
+  const userId = userInfo.userId;
+  console.log("id : " , id);
+  console.log("user id : " , userId);
+  return userId === id;  
+};
+
+const modifyData = async(articleNo) =>{
+  try{
+    const response = await axios.get(BASE_URL + "/article/getModifyData" , {
+      params :{
+        articleNo : articleNo
+      }
+    });
+    
+    if(response.status===200){
+      console.log("success");
+      return response.data;
+    }
+
+  }catch(error){
+    console.log("modify get Data ERROR" , erro);
+  }
+}
+
+const modifyBoard = async (articleNo , boardInfo, vm) =>{
+  try{
+    const response = await axios.put(BASE_URL + "/article/modify" , {
+      articleNo : articleNo,
+      subject : boardInfo.title,
+      content : boardInfo.content,
+    });
+     
+    if(response.status === 200){
+      alert("게시물 수정 완료");
+      vm.$router.push({
+        name: "boardDetail",
+        query: { articleno: articleNo },
+      });
+    }
+
+  }catch(error){
+    console.log("modifyBoard ERROR"  , error);
+  }
+}
+
 /**
  * 공인중개사 게시글
  */
-const boardAgent = () => {};
+const search = () => {};
 
 /**
  * 일반사용자 게시글
@@ -178,17 +284,93 @@ const boardUser = () => {};
 /**
  * 작성자 검색
  */
-const searchWriter = () => {};
+const searchAuthor = async (searchTerm) => {
+  try{
+    const response = await axios.get(BASE_URL + "/article/searchAuthor" , {
+      params: {
+        term : searchTerm,
+      },
+    });
+    if(response.status===200){
+      const formattedData = response.data.articles.map((post) => ({
+        id: post.articleNo, // articleNo -> id
+        content: post.content,
+        views: post.hit, // hit -> views
+        createdAt: post.registerTime, // registerTime -> createdAt
+        title: post.subject, // subject -> title
+        authorId: post.userId, // userId -> authorId
+        author: post.userName, // userName -> author
+        type: post.type ?? "general", // type 필드가 없다면 기본값 설정
+        date: post.registerTime.split(" ")[0], // 날짜를 'YYYY-MM-DD' 형식으로 분리
+      }));
+      return { posts: formattedData };
+    }
+  }catch(error){
+    console.log("searchAuthor Error :" , error);
+  }
+};
 
 /**
  * 제목 검색
  */
-const searchTitle = () => {};
+const searchTitle = async (searchTerm) => {
+  try{
+    const response = await axios.get(BASE_URL + "/article/searchTitle" , {
+      params: {
+        term : searchTerm,
+      },
+    });
+
+    if(response.status===200){
+      const formattedData = response.data.articles.map((post) => ({
+        id: post.articleNo, // articleNo -> id
+        content: post.content,
+        views: post.hit, // hit -> views
+        createdAt: post.registerTime, // registerTime -> createdAt
+        title: post.subject, // subject -> title
+        authorId: post.userId, // userId -> authorId
+        author: post.userName, // userName -> author
+        type: post.type ?? "general", // type 필드가 없다면 기본값 설정
+        date: post.registerTime.split(" ")[0], // 날짜를 'YYYY-MM-DD' 형식으로 분리
+      }));
+      return { posts: formattedData };
+    }
+
+  }catch(error){
+    console.log("searchAuthor Error :" , error);
+  }
+};
 
 /**
  * 작성자 + 제목 검색
  */
-const searchAll = () => {};
+const searchAll = async (searchTerm) => {
+  try{
+    const response = await axios.get(BASE_URL + "/article/searchAll" , {
+       params: {
+        term : searchTerm,
+      },
+    });
+
+    if(response.status===200){
+      const formattedData = response.data.articles.map((post) => ({
+        id: post.articleNo, // articleNo -> id
+        content: post.content,
+        views: post.hit, // hit -> views
+        createdAt: post.registerTime, // registerTime -> createdAt
+        title: post.subject, // subject -> title
+        authorId: post.userId, // userId -> authorId
+        author: post.userName, // userName -> author
+        type: post.type ?? "general", // type 필드가 없다면 기본값 설정
+        date: post.registerTime.split(" ")[0], // 날짜를 'YYYY-MM-DD' 형식으로 분리
+      }));
+      return { posts: formattedData };
+    }
+
+  }catch(error){
+    console.log("searchAuthor Error :" , error);
+  }
+};
 
 /**
  * 회원가입
@@ -255,4 +437,12 @@ export default {
   boardCreate,
   boardDetail,
   updateUserInfo,
+  addComment,
+  addChildComment,
+  modifyCheck,
+  modifyData,
+  modifyBoard,
+  searchTitle,
+  searchAuthor,
+  searchAll
 };
