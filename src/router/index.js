@@ -40,6 +40,11 @@ const routes = [
     name: "map",
     component: () => import(/* webpackChunkName: "about" */ "../views/Map.vue"),
   },
+  {
+    path:"/modify",
+    name:"modify",
+    component: () => import(/* webpackChunkName: "about" */ "@/views/board/BoardModify.vue"),
+  }
 
   //동적 import 방식 : 실제로 필요할때만 로딩됨으로 초기 로딩 시간을 줄일 수 있다. ( 로딩 성능 최적화를 할 수 있는 방법)
   // {

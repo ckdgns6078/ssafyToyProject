@@ -8,15 +8,15 @@
       <div class="filter-container">
         <div class="radio-group">
           <label>
-            <input type="radio" value="all" v-model="postType" checked />
+            <input type="radio" value="all" v-model="postType" @change="handleRadioChange" />
             전체
           </label>
           <label>
-            <input type="radio" value="broker" v-model="postType" />
+            <input type="radio" value="broker" v-model="postType" @change="handleRadioChange" />
             공인중개사
           </label>
           <label>
-            <input type="radio" value="general" v-model="postType" />
+            <input type="radio" value="general" v-model="postType" @change="handleRadioChange" />
             일반사용자
           </label>
         </div>
@@ -32,7 +32,7 @@
             placeholder="검색어 입력..."
             class="search-input"
           />
-          <button class="search-button">
+          <button class="search-button" @click="searchBoardList">
             <img
               src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='20' height='20'><path fill='black' d='M21.71 20.29l-4.39-4.39c1.5-2.03 2.39-4.56 2.39-7.29C19.71 3.4 16.31 0 12 0S4.29 3.4 4.29 8.29c0 4.88 3.9 8.79 8.79 8.79 2.73 0 5.26-.89 7.29-2.39l4.39 4.39c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41zM12 15.2c-3.88 0-7.2-3.32-7.2-7.2 0-3.88 3.32-7.2 7.2-7.2 3.88 0 7.2 3.32 7.2 7.2 0 3.88-3.32 7.2-7.2 7.2z'/></svg>"
             />
@@ -95,27 +95,27 @@ export default defineComponent({
         } else if (this.postType === "general" && post.type !== "general") {
           return false; // 일반사용자 글 필터링
         }
-        if (this.searchOption === "author") {
-          return post.author.includes(this.searchTerm);
-        } else if (this.searchOption === "title") {
-          return post.title.includes(this.searchTerm);
-        } else if (this.searchOption === "author_title") {
-          return post.author.includes(this.searchTerm) || post.title.includes(this.searchTerm);
-        }
+        // if (this.searchOption === "author") {
+        //   return post.author.includes(this.searchTerm);
+        // } else if (this.searchOption === "title") {
+        //   return post.title.includes(this.searchTerm);
+        // } else if (this.searchOption === "author_title") {
+        //   return post.author.includes(this.searchTerm) || post.title.includes(this.searchTerm);
+        // }
         return true;
       });
     },
   },
   methods: {
     async handleBoardList() {
-      //페이지 ?page 값 받기 없으면 1로 선언
+      // 페이지 ?page 값 받기 없으면 1로 선언
       const pageNum = this.$route.query.page || 1;
       const response = await this.$rest.boardAll(pageNum);
-      console.log("hadle response  :" + response);
+      console.log("handle response  :" + response);
 
       if (response && Array.isArray(response.posts)) {
         this.posts = response.posts;
-        console.log("post : ", this.posts);
+        console.log("posts : ", this.posts);
       } else {
         this.posts = [];
       }
@@ -124,6 +124,37 @@ export default defineComponent({
     writePost() {
       // 게시글 작성 페이지로 이동
       this.$router.push("/boardcreate");
+    },
+
+    // 검색
+    async searchBoardList() {
+      if(this.searchTerm.trim()===""){
+        alert("검색어를 입력해주세요");
+        return;
+      }
+
+      let response;
+
+      if(this.searchOption === "author"){
+        response = await this.$rest.searchAuthor(this.searchTerm);
+      }else if(this.seachOption ==="title"){
+        response = await this.$rest.searchTitle(this.searchTerm);
+      }else{
+        response = await this.$rest.searchAll(this.searchTerm);        
+      }
+
+      if (response && Array.isArray(response.posts)) {
+        this.posts = response.posts;
+        console.log("posts : ", this.posts);
+      } else {
+        this.posts = [];
+      }
+
+    },
+
+    handleRadioChange() {
+      // 라디오 버튼 선택 시 게시글 리스트를 필터링
+      this.filteredPosts;
     },
   },
   mounted() {
