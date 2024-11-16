@@ -60,7 +60,7 @@
                 <div v-if="comment.repliesVisible" class="replies">
                   <div class="reply" v-for="reply in comment.replies" :key="reply.id">
                     <div class="reply-content">
-                      <span>{{ reply.author }}</span>
+                      <span> [ {{ reply.author }} ]&nbsp;&nbsp;&nbsp;</span>
                       <span class="reply-date">{{ reply.createdAt }}</span>
                       <div>{{ reply.content }}</div>
                     </div>
