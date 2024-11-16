@@ -221,6 +221,10 @@ const updateUserInfo = async (updateData, vm) => {
   }
 };
 
+
+/**
+ * 회원 탈퇴
+ */
 const deleteUserInfo = async (vm) => {
   try {
     const token = localStorage.getItem("accessToken");
@@ -244,8 +248,54 @@ const deleteUserInfo = async (vm) => {
 };
 
 /**
- *
+ * 토큰 만료 확인 함수
  */
+const isTokenExpired = (token) => {
+  if(!token) return true;
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  console.log("playload", payload);
+  return payload.exp * 1000 < Date.now();
+}
+
+/**
+ * 강제 로그아웃 함수
+ */
+const forceLogout = (vm) => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  vm.$router.push({ name: "home" });
+};
+
+/**
+ * Access Token 및 Refresh Token 확인 및 갱신
+ */
+const validateAndRefreshToken = async (vm) => {
+  let accessToken = localStorage.getItem("accessToken");
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  // Access Token 만료 확인
+  if (!accessToken || isTokenExpired(accessToken)) {
+    if (!refreshToken || isTokenExpired(refreshToken)) {
+      // Refresh Token도 만료 -> 강제 로그아웃
+      console.error("Refresh Token이 만료되었습니다. 로그아웃합니다.");
+      forceLogout(vm);
+      return false;
+    }
+
+    try {
+      // Refresh Token을 사용하여 Access Token 재발급
+      const response = await axios.post(`${BASE_URL}/user/refresh`, { refreshToken });
+      accessToken = response.data.accessToken;
+      localStorage.setItem("accessToken", accessToken);
+    } catch (error) {
+      console.error("토큰 갱신 실패:", error);
+      forceLogout();
+      return false;
+    }
+  }
+
+  return true;
+};
 
 export default {
   boardAll,
@@ -255,4 +305,5 @@ export default {
   boardCreate,
   boardDetail,
   updateUserInfo,
+  validateAndRefreshToken,
 };

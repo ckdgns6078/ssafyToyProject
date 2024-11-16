@@ -6,7 +6,7 @@
         src="../assets/img/logo1.png"
         width="200"
         height="80"
-        @click="goToHome"
+        @click="handleLogoClick"
         style="cursor: pointer"
       />
     </v-toolbar-title>
@@ -14,44 +14,47 @@
     <v-spacer></v-spacer>
 
     <div class="button-container">
-      <v-btn class="flex-button" text @click="goToMap">Map</v-btn>
-      <v-btn class="flex-button" text @click="goToBoard">게시판</v-btn>
-      <v-btn class="flex-button" text @click="goToMyPage">마이페이지</v-btn>
+      <v-btn class="flex-button" text @click="navigateTo('map')">Map</v-btn>
+      <v-btn class="flex-button" text @click="navigateTo('board')">게시판</v-btn>
+      <v-btn class="flex-button" text @click="navigateTo('mypage')">마이페이지</v-btn>
     </div>
 
     <v-spacer></v-spacer>
 
     <!-- 사용자 정보 아이콘 버튼 -->
+    <v-btn v-if="isLoggedIn" icon ref="userInfoButton" @click="toggleUserInfoMenu">
+      <v-icon>mdi-account</v-icon>
+    </v-btn>
+
     <v-menu
+      v-if="isLoggedIn"
       v-model="isUserInfoMenuVisible"
       :close-on-content-click="true"
+      :activator="$refs.userInfoButton"
       offset-y
     >
-      <template v-slot:activator="{ attrs, on }">
-        <v-btn icon v-bind="attrs" v-on="on">
-          <v-icon>mdi-account</v-icon>
-        </v-btn>
-      </template>
-
-      <v-list>
-        <!-- 사용자 아이디 및 이름을 표시 -->
-        <v-list-item>
-          <v-list-item-title>아이디: {{ userId }}</v-list-item-title>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>이름: {{ userName }}</v-list-item-title>
-        </v-list-item>
-
-        <!-- 마이페이지 및 로그아웃 버튼 -->
-        <v-list-item>
-          <v-btn text @click="goToMyPage">마이페이지</v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn color="primary" text @click="logout">로그아웃</v-btn>
-        </v-list-item>
-      </v-list>
+      <v-card>
+        <v-list>
+          <!-- 사용자 아이디 및 이름을 표시 -->
+          <v-list-item>
+            <v-list-item-title>아이디: {{ userId }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>이름: {{ userName }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>{{ userType }}</v-list-item-title>
+          </v-list-item>
+          <!-- 마이페이지 및 로그아웃 버튼 -->
+          <v-list-item>
+            <v-btn text @click="goToMyPage">마이페이지</v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn color="primary" text @click="logout">로그아웃</v-btn>
+          </v-list-item>
+        </v-list>
+      </v-card>
     </v-menu>
-
   </v-app-bar>
 </template>
 
@@ -83,6 +86,25 @@ export default defineComponent({
         this.userName = userInfo.userName; // 사용자 이름 설정
         this.userType = userInfo.type === 1 ? "일반인" : "공인중개사";
         this.isLoggedIn = true; // 로그인 상태 업데이트
+      }
+    },
+    toggleUserInfoMenu() {
+      this.isUserInfoMenuVisible = !this.isUserInfoMenuVisible;
+    },
+    async handleLogoClick() {
+      // 로고 클릭 시 로그인 여부에 따라 페이지 이동 결정
+      const isValid = await Rest.validateAndRefreshToken(this);
+      if(isValid) {
+        this.$router.push({ name: "board" });
+      } else {
+        this.$router.push({ name: "home" });
+      }
+ 
+    },
+    async navigateTo(page) {
+      const isValid = await Rest.validateAndRefreshToken(this);
+      if(isValid){
+        this.$router.push({ name: page });
       }
     },
     goToHome() {
